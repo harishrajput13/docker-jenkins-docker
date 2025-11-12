@@ -1,2 +1,3 @@
-# docker-jenkins-docker
-Project Discription: creating a jenkins container, creating pipeline that pulls image from dockerhub and runs a a container from that image
+# Docker-Jenkins-Docker
+Project Discription:-
+Creating a jenkins container from docker and then create pipeline in jenkins that pulls image from dockerhub and runs a container from that image
