@@ -1,2 +1,2 @@
 # docker-jenkins-docker
-Docker - Jenkins - Docker Image - Docker-run-cont
+Project Discription: creating a jenkins container, creating pipeline that pulls image from dockerhub and runs a a container from that image
