@@ -22,6 +22,7 @@ pipeline {
         stage ('Run Docker Container') { 
             steps {
                 script{ 
+                    sh 'docker rm -f ${DOCKER_CONTAINER_NAME} || true'
                     sh 'docker run -itd -p 80:80 --name ${DOCKER_CONTAINER_NAME} ${DOCKER_IMAGE}' 
                 }
             }
