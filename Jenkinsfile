@@ -23,7 +23,7 @@ pipeline {
             steps {
                 script{ 
                     sh '''
-                        docker rm -f ${DOCKER_CONTAINER_NAME} || true
+                        docker rm -f <container_id> || true
                         docker run -itd -p 80:80 --name ${DOCKER_CONTAINER_NAME} ${DOCKER_IMAGE} 
                     '''
                 }
