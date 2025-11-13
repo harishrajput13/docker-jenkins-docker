@@ -21,11 +21,13 @@ pipeline {
         }
         stage ('Run Docker Container') { 
             steps {
-                script{ 
-                    sh """
-                        docker rm -f ${DOCKER_CONTAINER_NAME} || true
-                        docker run -itd -p 80:80 --name ${DOCKER_CONTAINER_NAME} ${DOCKER_IMAGE} 
-                    """
+                script { 
+                        sh 'docker rm -f ${DOCKER_CONTAINER_NAME} || true'
+                        sh 'def containerId = sh(script: "docker run -itd -p 80:80 --name ${DOCKER_CONTAINER_NAME} ${DOCKER_IMAGE}", returnStdout: true).trim()'
+                        sh 'env.CONTAINER_ID=container_id'
+                    
+                        echo "Creating image of running container"
+                        sh 'docker commit ${CONTAINER_ID} ${NEW_IMAGE_NAME}'
                 }
             }
         }
@@ -33,13 +35,6 @@ pipeline {
             steps {  
                 echo "testing docker container is running or not"
                 sh 'docker ps | grep ${DOCKER_CONTAINER_NAME}'
-            }
-        }
-        stage ('Creating image of running container') {
-            steps { 
-                script { 
-                    sh 'docker commit ${DOCKER_CONTAINER_NAME} ${NEW_IMAGE_NAME}'
-                }
             }
         }
         stage ('Login in to dockerhub registry') {
