@@ -59,11 +59,11 @@ pipeline {
         }
     }
     post {
-        failure { 
-            echo "Pipeline is fail"
+        success {
+            echo "Pipeline succeeded! Image pushed to DockerHub."
         }
-        success { 
-            echo "Pipeline is success" 
+        failure {
+            echo "Pipeline failed. Check the logs for details."
         }
     }
 }
