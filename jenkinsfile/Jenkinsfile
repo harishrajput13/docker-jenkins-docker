@@ -2,6 +2,7 @@ pipeline {
     agent {label 'slave-1'}
     environment {
         DOCKER_IMAGE="harishrajput3/harish-repo:nginx-image-dockerfile"
+        DOCKER_CONTAINER_NAME="nginx-cont"
     }
     stages { 
         stage ('Pull docker image') { 
@@ -23,7 +24,7 @@ pipeline {
         stage ('Test container') {
             steps {  
                 echo "testing docker container is running or not"
-                sh 'docker ps | grep nginx-cont'
+                sh 'docker ps | grep ${DOCKER_CONTAINER_NAME}'
             }
         }
     }
