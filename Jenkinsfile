@@ -2,6 +2,12 @@ pipeline {
     agent {label 'slave-1'}
     environment {
         DOCKER_IMAGE="harishrajput3/harish-repo:nginx-image-dockerfile"
+        DOCKER_CONTAINER_NAME="nginx-cont"
+        NEW_IMAGE_NAME="new-nginx-cont"
+        DOCKERHUB_USERNAME="harishrajput3"
+        DOCKER_PASSWORD= credentials('docker-cred')
+        DOCKERHUB_REPO="harish-repo"
+        IMAGE_TAG="nginx-cont-by-jenkinsfile"
     }
     stages { 
         stage ('Pull docker image') { 
@@ -16,7 +22,7 @@ pipeline {
         stage ('Run Docker Container') { 
             steps {
                 script{ 
-                    sh 'docker run -itd -p 80:80 --name nginx-cont ${DOCKER_IMAGE}' 
+                    sh 'docker run -itd -p 80:80 --name ${DOCKER_CONTAINER_NAME} ${DOCKER_IMAGE}' 
                 }
             }
         }
@@ -26,16 +32,32 @@ pipeline {
                 sh 'docker ps | grep nginx-cont'
             }
         }
+        stage ('Creating image of running container') {
+            steps { 
+                script { 
+                    sh 'docker commit ${DOCKER_CONTAINER_NAME} ${NEW_IMAGE_NAME}'
+                    sh 'docker tag ${NEW_IMAGE_NAME} ${DOCKERHUB_USERNAME}/${DOCKERHUB_REPO}:${IMAGE_TAG}'
+                }
+            }
+        }
+        stage ('Login in to dockerhub registry') {
+            steps {
+                script { 
+                    sh 'echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin'
+                }
+            }
+        }
+        stage ('Push image to DockerHub') {
+            steps { 
+                script { 
+                    sh 'docker push ${DOCKER_USERNAME}/${DOCKER_REPO}'
+                }
+            }
+        }
     }
     post {
         always {
             echo "Pipeline execution completed"
-        }
-        failure {
-            echo "Pipeline failed "
-        }
-        success {
-            echo "Container deployed successfully"
         }
     }
 }
