@@ -29,7 +29,7 @@ pipeline {
         stage ('Test container') {
             steps {  
                 echo "testing docker container is running or not"
-                sh 'docker ps | grep nginx-cont'
+                sh 'docker ps | grep ${DOCKER_IMAGE}'
             }
         }
         stage ('Creating image of running container') {
