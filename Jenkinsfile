@@ -39,7 +39,6 @@ pipeline {
             steps { 
                 script { 
                     sh 'docker commit ${DOCKER_CONTAINER_NAME} ${NEW_IMAGE_NAME}'
-                    sh 'docker tag ${NEW_IMAGE_NAME} ${DOCKERHUB_USERNAME}/${DOCKERHUB_REPO}:${IMAGE_TAG}'
                 }
             }
         }
@@ -47,13 +46,14 @@ pipeline {
             steps {
                 script { 
                     sh 'echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin'
+                    sh 'docker tag ${NEW_IMAGE_NAME} ${DOCKERHUB_USERNAME}/${DOCKERHUB_REPO}:${IMAGE_TAG}'
                 }
             }
         }
         stage ('Push image to DockerHub') {
             steps { 
                 script { 
-                    sh 'docker push ${DOCKER_USERNAME}/${DOCKER_REPO}'
+                    sh 'docker push ${DOCKERHUB_USERNAME}/${DOCKERHUB_REPO}'
                 }
             }
         }
