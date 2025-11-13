@@ -24,7 +24,7 @@ pipeline {
                 script { 
                         sh 'docker rm -f ${DOCKER_CONTAINER_NAME} || true'
                         sh 'def containerId = sh(script: "docker run -itd -p 80:80 --name ${DOCKER_CONTAINER_NAME} ${DOCKER_IMAGE}", returnStdout: true).trim()'
-                        env.CONTAINER_ID=container_id
+                        env.CONTAINER_ID=containerId
                     
                         echo "Creating image of running container"
                         sh 'docker commit ${CONTAINER_ID} ${NEW_IMAGE_NAME}'
