@@ -1,42 +1,64 @@
 pipeline {
-    agent {label 'slave-1'}
-    environment {
-        DOCKER_IMAGE="harishrajput3/harish-repo:nginx-image-dockerfile"
-        DOCKER_CONTAINER_NAME="nginx-cont"
+  agent { label 'slave-1' }
+
+  environment {
+    DOCKERHUB_REPO = 'harishrajput3/harish-repo' 
+    IMAGE_TAG = "build-${env.BUILD_NUMBER}"
+    DOCKER_CRED_ID = 'docker-hub-cred'
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
     }
-    stages { 
-        stage ('Pull docker image') { 
-            steps { 
-                script {
-                    docker.withRegistry('https://index.docker.io/v1/', 'docker-cred') {
-                        docker.image("${DOCKER_IMAGE}").pull()
-                    }
-                }
-            }
+
+    stage('Build Image') {
+      steps {
+        script {
+          sh 'docker build -t ${DOCKERHUB_REPO}:${IMAGE_TAG}'
         }
-        stage ('Run Docker Container') { 
-            steps {
-                script{ 
-                    sh 'docker run -itd -p 80:80 --name nginx-cont ${DOCKER_IMAGE}' 
-                }
-            }
-        }
-        stage ('Test container') {
-            steps {  
-                echo "testing docker container is running or not"
-                sh 'docker ps | grep ${DOCKER_CONTAINER_NAME}'
-            }
-        }
+      }
     }
-    post {
-        always {
-            echo "Pipeline execution completed"
+
+    stage('Test Image') {
+      steps {
+        script {
+          sh '''
+            CID=$(docker run -d -p 8080:80 ${DOCKERHUB_REPO}:${IMAGE_TAG})
+            docker ps | grep ${CID}
+            docker rm -f ${CID} || true
+          '''
         }
-        failure {
-            echo "Pipeline failed "
-        }
-        success {
-            echo "Container deployed successfully"
-        }
+      }
     }
+
+    stage('Login & Push') {
+      steps {
+        script {
+          docker.withRegistry('https://index.docker.io/v1/', DOCKER_CRED_ID) {
+            sh "docker push ${DOCKERHUB_REPO}:${IMAGE_TAG}"
+          }
+        }
+      }
+    }
+
+    stage('Cleanup') {
+      steps {
+        script {
+          sh "docker rmi ${DOCKERHUB_REPO}:${IMAGE_TAG} || true"
+        }
+      }
+    }
+  }
+
+  post {
+    success {
+      echo "Image ${DOCKERHUB_REPO}:${IMAGE_TAG} pushed successfully."
+    }
+    failure {
+      echo "Pipeline failed. Check logs."
+    }
+  }
 }
