@@ -1,0 +1,68 @@
+pipeline {
+  agent { label 'slave-1' }
+
+  environment {
+    DOCKERHUB_REPO = 'harishrajput3/harish-repo' 
+    IMAGE_TAG = "build-${env.BUILD_NUMBER}"
+    DOCKER_CRED_ID = 'docker-hub-cred'
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
+    stage('Build Image') {
+      steps {
+        script {
+          sh 'docker build -t ${DOCKERHUB_REPO}:${IMAGE_TAG} .'
+        }
+      }
+    }
+
+    stage('Test Image') {
+      steps {
+        script {
+          sh '''
+            CID=$(docker run -d -p 8080:80 ${DOCKERHUB_REPO}:${IMAGE_TAG})
+            docker rm -f $CID || true
+          '''
+        }
+      }
+    }
+
+    stage('Login & Push') {
+      steps {
+        script {
+            withCredentials([[ $class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS_Credentials' ]]) {
+                sh """
+                    aws ecr get-login-password --region eu-north-1 | docker login --username AWS --password-stdin 150916258276.dkr.ecr.eu-north-1.amazonaws.com
+                    docker push ${DOCKER_FULL_IMAGE}
+                """
+            }
+                echo "Pushed ${DOCKER_FULL_IMAGE} to ECR."
+        }
+      }
+    }
+
+    stage('Cleanup') {
+      steps {
+        script {
+          sh "docker rmi ${DOCKERHUB_REPO}:${IMAGE_TAG} || true"
+        }
+      }
+    }
+  }
+
+  post {
+    success {
+      echo "Image ${DOCKERHUB_REPO}:${IMAGE_TAG} pushed successfully."
+    }
+    failure {
+      echo "Pipeline failed. Check logs."
+    }
+  }
+}
+
