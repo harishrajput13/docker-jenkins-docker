@@ -18,3 +18,6 @@ Note:
  1. Your Dockerfile must be in the root dir not anywere, it must be /home/ubuntu/<user>/workspace/<pipeline>/Dockerfile .
  2. Set the credentials for git, dockerhub, & slave (if you are using master & slave architecture).
  3. If running this practical on slave make sure to match the label of node and the groovy syntax label.
+
+
+web-hook
