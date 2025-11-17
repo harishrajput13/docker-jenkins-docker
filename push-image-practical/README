@@ -1,0 +1,20 @@
+Pushing Docker image to DockerHub 
+
+Jenkins groovy pipeline contains:
+ 1. Build image from Dockerfile.
+ 2. Test that image by creating a container.
+ 3. Login into the DockerHub account. 
+ 4. Push that image to DockerHub. 
+ 5. Clean all the images in docker. 
+
+Plugins Needed :
+ 1. SSH build agent.
+ 2. Git.
+ 3. Pipeline. 
+ 4. Credentials Binding.
+ 5. Docker pipeline & plugin.
+
+Note: 
+ 1. Your Dockerfile must be in the root dir not anywere, it must be /home/ubuntu/<user>/workspace/<pipeline>/Dockerfile .
+ 2. Set the credentials for git, dockerhub, & slave (if you are using master & slave architecture).
+ 3. If running this practical on slave make sure to match the label of node and the groovy syntax label.
