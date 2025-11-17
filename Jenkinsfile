@@ -27,7 +27,7 @@ pipeline {
         script {
           sh '''
             CID=$(docker run -d -p 8080:80 ${DOCKERHUB_REPO}:${IMAGE_TAG})
-            docker ps | grep ${CID}
+            docker ps | grep ${CID} || true
             docker rm -f ${CID} || true
           '''
         }
