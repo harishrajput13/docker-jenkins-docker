@@ -2,7 +2,7 @@ pipeline {
   agent { label 'slave-1' }
 
   environment {
-    DOCKERHUB_REPO = 'harishrajput3/harish-repo' 
+    AWS_REPO = '042666117784.dkr.ecr.us-east-1.amazonaws.com/push-from-pipeline' 
     IMAGE_TAG = "build-${env.BUILD_NUMBER}"
     DOCKER_CRED_ID = 'docker-hub-cred'
   }
@@ -17,7 +17,7 @@ pipeline {
     stage('Build Image') {
       steps {
         script {
-          sh 'docker build -t ${DOCKERHUB_REPO}:${IMAGE_TAG} .'
+          sh 'docker build -t ${AWS_REPO}:${IMAGE_TAG} .'
         }
       }
     }
@@ -26,23 +26,23 @@ pipeline {
       steps {
         script {
           sh '''
-            CID=$(docker run -d -p 8080:80 ${DOCKERHUB_REPO}:${IMAGE_TAG})
+            CID=$(docker run -d -p 8080:80 ${AWS_REPO}:${IMAGE_TAG})
             docker rm -f $CID || true
           '''
         }
       }
     }
 
-    stage('Login & Push') {
+    stage('Login & Push to ECR') {
       steps {
         script {
-            withCredentials([[ $class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS_Credentials' ]]) {
+            withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'aws-cred', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                 sh """
-                    aws ecr get-login-password --region eu-north-1 | docker login --username AWS --password-stdin 150916258276.dkr.ecr.eu-north-1.amazonaws.com
-                    docker push ${DOCKER_FULL_IMAGE}
+                    aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 042666117784.dkr.ecr.us-east-1.amazonaws.com
+                    docker push ${AWS_REPO}:${IMAGE_TAG}
                 """
             }
-                echo "Pushed ${DOCKER_FULL_IMAGE} to ECR."
+                echo "Pushed ${AWS_REPO}:${IMAGE_TAG} to ECR."
         }
       }
     }
@@ -50,7 +50,7 @@ pipeline {
     stage('Cleanup') {
       steps {
         script {
-          sh "docker rmi ${DOCKERHUB_REPO}:${IMAGE_TAG} || true"
+          sh "docker rmi ${AWS_REPO}:${IMAGE_TAG} || true"
         }
       }
     }
@@ -58,7 +58,7 @@ pipeline {
 
   post {
     success {
-      echo "Image ${DOCKERHUB_REPO}:${IMAGE_TAG} pushed successfully."
+      echo "Image ${AWS_REPO}:${IMAGE_TAG} pushed successfully."
     }
     failure {
       echo "Pipeline failed. Check logs."
