@@ -5,6 +5,8 @@ pipeline {
     AWS_REPO = '042666117784.dkr.ecr.us-east-1.amazonaws.com/push-from-pipeline' 
     IMAGE_TAG = "build-${env.BUILD_NUMBER}"
     DOCKER_CRED_ID = 'docker-hub-cred'
+    AWS_ACCESS_KEY_ID='aws-cred'
+    AWS_SECRET_ACCESS_KEY='aws-cred'
   }
 
   stages {
