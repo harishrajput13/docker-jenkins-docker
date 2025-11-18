@@ -11,4 +11,4 @@ Note:
  1. Indise the slave install Docker Engine, aws-cli & java (java version in bothe master and slave must be same.)
  2. The label in the groovy syntax and the node must match.
  3. use the aws credentials in the groovy syntax with same as aws credential ID created within jenkins. 
- 
+ 4. Replace the AWS repo URL with your repo URL.  
