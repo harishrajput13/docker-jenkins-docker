@@ -1,0 +1,14 @@
+Build a Docker Image & Push to AWS ECR 
+
+Plugins need to install :
+ 1. SSH-build agent
+ 2. AWS Credentials 
+ 3. Docker plugin & pipeline
+ 4. Credential Binding 
+ 5. Git 
+ 
+Note: 
+ 1. Indise the slave install Docker Engine, aws-cli & java (java version in bothe master and slave must be same.)
+ 2. The label in the groovy syntax and the node must match.
+ 3. use the aws credentials in the groovy syntax with same as aws credential ID created within jenkins. 
+ 
